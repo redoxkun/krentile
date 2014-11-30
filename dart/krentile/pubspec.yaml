@@ -1,0 +1,7 @@
+name: krentile
+version: 1.0.0
+author: Albert Murciego Rico
+description: A tile rendering engine
+homepage: https://github.com/redoxkun/krentile
+environment:
+  sdk: 1.8.0
