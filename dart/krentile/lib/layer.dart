@@ -160,6 +160,10 @@ class Layer {
       }
       
     }
+
+    _objectIndices.sort((int a, int b) {
+      return objects[a].y - objects[b].y;
+    });
     
     for (int objectIndex in _objectIndices) {
       SceneObject object = objects[objectIndex];
