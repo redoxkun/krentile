@@ -31,8 +31,10 @@ part 'layer.dart';
 part 'tileset.dart';
 part 'tile.dart';
 part 'camera.dart';
+part 'common_object.dart';
 part 'scene_object.dart';
 part 'scene_object_type.dart';
+part 'text_object.dart';
 
 part 'texture_manager.dart';
 part 'shader_manager.dart';
@@ -76,14 +78,24 @@ class Krentile {
    * TODO
    */
   Future loadSceneFromJson(var scene) {
+    if (_currentScene != null) {
+      _currentScene.cleanUp(_renderingContext);
+    }
+    
     _currentScene = new Scene();
     
     Future future = _currentScene.loadFromJson(scene, _renderingContext);
 
-    _canvas.width = _currentScene.width;
-    _canvas.height = _currentScene.height;
+    _currentScene.viewportWidth = _canvas.width;
+    _currentScene.viewportHeight = _canvas.height;
     
     return future;
+  }
+  
+  void cleanUp() {
+    if (_currentScene != null) {
+      _currentScene.cleanUp(_renderingContext);
+    }
   }
   
   /**
@@ -98,25 +110,21 @@ class Krentile {
     _currentScene.draw(_renderingContext);
   }
   
-  /**
-   * finish
-   * 
-   * Clears any texture set
-   */
-  void disposeTextures() {
-    TextureManager.instance.clearTextures();
-  }
-  
   SceneObject getObject(int objectId) {
     if (_currentScene == null) {
       throw new NoSceneFoundException('No current scene available');
     }
     
-    return _currentScene.objects[objectId];
+    return _currentScene.sceneObjects[objectId];
   }
   
   int get cameraX => _currentScene.camera.x;
   int get cameraY => _currentScene.camera.y;
+  
+  
+  /**
+   * Camera management functions
+   */
   
   void set cameraX(int x) {
     _currentScene.camera.x = x;
@@ -126,6 +134,11 @@ class Krentile {
     _currentScene.camera.y = y;
   }
 
+  
+  /**
+   * Events functions
+   */
+  
   int event(int x, int y) {
     if (_currentScene == null) {
       throw new NoSceneFoundException('No current scene available');
@@ -139,6 +152,117 @@ class Krentile {
       throw new NoSceneFoundException('No current scene available');
     }
     
+    _currentScene.changeEvent(x, y, value);
+  }
+
+  
+  /**
+   * Scene objects management functions
+   */
+  
+  int addObject(SceneObject object, int layer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    return _currentScene.addSceneObject(object, layer);
+  }
+  
+  void removeObject(int index, int layer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.removeSceneObject(index, layer);
+  }
+  
+  void changeObject(int index, SceneObject newObject) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.changeSceneObject(index, newObject);
+  }
+  
+  void changeObjectBetweenLayers(int index, int fromLayer, int toLayer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.changeSceneObjectBetweenLayers(index, fromLayer, toLayer);
+  }
+  
+  
+  /**
+   * Text functions
+   */
+  
+  int addText(String text, int x, int y, String tileSet, int layer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    return _currentScene.addText(text, x, y, tileSet, layer, _renderingContext);
+  }
+  
+  void removeText(int index, int layer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.removeTextObject(index, layer, _renderingContext);
+  }
+  
+  void changeText(int index, String text) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    TextObject textObject = _currentScene.textObjects[index];
+    textObject.text = text;
+    textObject.updateBuffers(_renderingContext);
+  }
+  
+  void changeTextX(int index, int x) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+
+    _currentScene.textObjects[index].x = x;
+  }
+  
+  void changeTextY(int index, int y) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+
+     _currentScene.textObjects[index].y = y;
+  }
+  
+  void changeTextPosition(int index, int x, int y) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+
+    TextObject textObject = _currentScene.textObjects[index];
+    textObject.x = x;
+    textObject.y = y;
+  }
+  
+  void changeTextVisibility(int index, bool visible) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.textObjects[index].visible = visible;
+  }
+  
+  void changeTextBetweenLayers(int index, int fromLayer, int toLayer) {
+    if (_currentScene == null) {
+      throw new NoSceneFoundException('No current scene available');
+    }
+    
+    _currentScene.changeTextObjectBetweenLayers(index, fromLayer, toLayer);
   }
   
   WebGL.RenderingContext get renderingContext => _renderingContext;

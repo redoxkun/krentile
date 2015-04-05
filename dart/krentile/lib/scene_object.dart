@@ -20,14 +20,9 @@
 
 part of krentile;
 
-class SceneObject {
+class SceneObject extends CommonObject {
   
   int _type;
-  
-  int _x;
-  int _y;
-  
-  bool _visible;
   
   int _state;
   
@@ -38,8 +33,13 @@ class SceneObject {
   int _drawsToAdvanceFrame;
   int _drawsAdvanced;
   
-  SceneObject.data(this._type, this._x, this._y,
-      this._visible, this._state, this._drawsToAdvanceFrame) {
+  SceneObject.data(this._type, int x, int y,
+      bool visible, this._state, this._drawsToAdvanceFrame) {
+    _x = x;
+    _y = y;
+    
+    _visible = visible;
+    
     _frame = 0;
     _autoAnimation = true;
     _drawsAdvanced = 0;
@@ -48,21 +48,6 @@ class SceneObject {
   int get type => _type;
   void set type(int type) {
     _type = type;
-  }
-  
-  int get x => _x;
-  void set x(int x) {
-    _x = x;
-  }
-  
-  int get y => _y;
-  void set y(int y) {
-    _y = y;
-  }
-  
-  bool get visible => _visible;
-  void set visible(bool visible) {
-    _visible = visible;
   }
   
   int get state => _state;

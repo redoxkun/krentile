@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 Albert Murciego Rico
+ * Copyright (c) 2015 Albert Murciego Rico
  * 
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -20,25 +20,26 @@
 
 part of krentile;
 
-class Tile {
+class CommonObject {
+
+  int _x;
+  int _y;
   
-  final double _left;
-  final double _top;
-  final double _right;
-  final double _bottom;
+  bool _visible;
+
+  int get x => _x;
+  void set x(int x) {
+    _x = x;
+  }
   
-  final double _widthPixels;
-  final double _heightPixels;
+  int get y => _y;
+  void set y(int y) {
+    _y = y;
+  }
   
-  Tile(this._left, this._top, this._right, this._bottom,
-      this._widthPixels, this._heightPixels);
-  
-  double get left => _left;
-  double get top => _top;
-  double get right => _right;
-  double get bottom => _bottom;
-  
-  double get withPixels => _widthPixels;
-  double get heightPixels => _heightPixels;
+  bool get visible => _visible;
+  void set visible(bool visible) {
+    _visible = visible;
+  }
   
 }

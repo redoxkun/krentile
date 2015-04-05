@@ -20,6 +20,7 @@
 
 import 'dart:async';
 import 'dart:html';
+import 'dart:math';
 
 import 'package:krentile/krentile.dart';
 
@@ -32,7 +33,9 @@ class Game {
   
   Krentile _krentile;
   Alex _alex;
-  Scorpion _scorpion;
+  List<Scorpion> _scorpions;
+  
+  int _fpsTextObjectIndex;
 
   bool _downPressed = false;
   bool _upPressed = false;
@@ -74,6 +77,8 @@ class Game {
     });
     
     _canvas = querySelector("#webgl-canvas");
+    _canvas.width = 960;
+    _canvas.height = 720;
     
     initKrentile();
   }
@@ -84,6 +89,8 @@ class Game {
   void resetCanvas() {
     _canvas = new CanvasElement();
     _canvas.id = "webgl-canvas";
+    _canvas.width = 960;
+    _canvas.height = 720;
     _replaceCanvas = true;
   }
   
@@ -197,6 +204,14 @@ class Game {
             "tileSize":8,
             "tileSet":"alexkiddtest1.png",
             "objects":[0, 1]
+          },
+          {
+            "speedX":0.0,
+            "speedY":0.0,
+            "tilemap":[[]],
+            "tileSize":8,
+            "tileSet":"alexkiddtest1.png",
+            "objects":[]
           }
         ],
       "tileSets":[
@@ -327,6 +342,80 @@ class Game {
                       {"left": 96, "top": 64, "right":104, "bottom":72}
 
                     ]
+          },
+          {
+            "image":"alexkiddtest3.png",
+            "width":128,
+            "height":128,
+            "tiles":[
+                      {"left":  0,  "top": 0, "right":  8, "bottom": 8},
+                      {"left":  8,  "top": 0, "right": 16, "bottom": 8},
+                      {"left": 16,  "top": 0, "right": 24, "bottom": 8},
+                      {"left": 24,  "top": 0, "right": 32, "bottom": 8},
+                      {"left": 32,  "top": 0, "right": 40, "bottom": 8},
+                      {"left": 40,  "top": 0, "right": 48, "bottom": 8},
+                      {"left": 48,  "top": 0, "right": 56, "bottom": 8},
+                      {"left": 56,  "top": 0, "right": 64, "bottom": 8},
+                      {"left": 64,  "top": 0, "right": 72, "bottom": 8},
+                      {"left": 72,  "top": 0, "right": 80, "bottom": 8},
+                      {"left": 80,  "top": 0, "right": 88, "bottom": 8},
+                      {"left": 88,  "top": 0, "right": 96, "bottom": 8},
+                      {"left": 96,  "top": 0, "right":104, "bottom": 8},
+                      {"left":104,  "top": 0, "right":112, "bottom": 8},
+                      {"left":112,  "top": 0, "right":120, "bottom": 8},
+                      {"left":120,  "top": 0, "right":128, "bottom": 8},
+
+                      {"left":  0,  "top": 8, "right":  8, "bottom":16},
+                      {"left":  8,  "top": 8, "right": 16, "bottom":16},
+                      {"left": 16,  "top": 8, "right": 24, "bottom":16},
+                      {"left": 24,  "top": 8, "right": 32, "bottom":16},
+                      {"left": 32,  "top": 8, "right": 40, "bottom":16},
+                      {"left": 40,  "top": 8, "right": 48, "bottom":16},
+                      {"left": 48,  "top": 8, "right": 56, "bottom":16},
+                      {"left": 56,  "top": 8, "right": 64, "bottom":16},
+                      {"left": 64,  "top": 8, "right": 72, "bottom":16},
+                      {"left": 72,  "top": 8, "right": 80, "bottom":16},
+                      {"left": 80,  "top": 8, "right": 88, "bottom":16},
+                      {"left": 88,  "top": 8, "right": 96, "bottom":16},
+                      {"left": 96,  "top": 8, "right":104, "bottom":16},
+                      {"left":104,  "top": 8, "right":112, "bottom":16},
+                      {"left":112,  "top": 8, "right":120, "bottom":16},
+                      {"left":120,  "top": 8, "right":128, "bottom":16},
+
+                      {"left":  0,  "top":16, "right":  8, "bottom":24},
+                      {"left":  8,  "top":16, "right": 16, "bottom":24},
+                      {"left": 16,  "top":16, "right": 24, "bottom":24},
+                      {"left": 24,  "top":16, "right": 32, "bottom":24},
+                      {"left": 32,  "top":16, "right": 40, "bottom":24},
+                      {"left": 40,  "top":16, "right": 48, "bottom":24},
+                      {"left": 48,  "top":16, "right": 56, "bottom":24},
+                      {"left": 56,  "top":16, "right": 64, "bottom":24},
+                      {"left": 64,  "top":16, "right": 72, "bottom":24},
+                      {"left": 72,  "top":16, "right": 80, "bottom":24},
+                      {"left": 80,  "top":16, "right": 88, "bottom":24},
+                      {"left": 88,  "top":16, "right": 96, "bottom":24},
+                      {"left": 96,  "top":16, "right":104, "bottom":24},
+                      {"left":104,  "top":16, "right":112, "bottom":24},
+                      {"left":112,  "top":16, "right":120, "bottom":24},
+                      {"left":120,  "top":16, "right":128, "bottom":24},
+
+                      {"left":  0,  "top":24, "right":  8, "bottom":32},
+                      {"left":  8,  "top":24, "right": 16, "bottom":32},
+                      {"left": 16,  "top":24, "right": 24, "bottom":32},
+                      {"left": 24,  "top":24, "right": 32, "bottom":32},
+                      {"left": 32,  "top":24, "right": 40, "bottom":32},
+                      {"left": 40,  "top":24, "right": 48, "bottom":32},
+                      {"left": 48,  "top":24, "right": 56, "bottom":32},
+                      {"left": 56,  "top":24, "right": 64, "bottom":32},
+                      {"left": 64,  "top":24, "right": 72, "bottom":32},
+                      {"left": 72,  "top":24, "right": 80, "bottom":32},
+                      {"left": 80,  "top":24, "right": 88, "bottom":32},
+                      {"left": 88,  "top":24, "right": 96, "bottom":32},
+                      {"left": 96,  "top":24, "right":104, "bottom":32},
+                      {"left":104,  "top":24, "right":112, "bottom":32},
+                      {"left":112,  "top":24, "right":120, "bottom":32},
+                      {"left":120,  "top":24, "right":128, "bottom":32}
+                    ]
           }
         ],
       "objects":[
@@ -422,9 +511,17 @@ class Game {
     
     future.then((_) {
       _alex = new Alex(_krentile.getObject(0));
-      _scorpion = new Scorpion(_krentile.getObject(1));
+      _scorpions = new List<Scorpion>();
+      _scorpions.add(new Scorpion(_krentile.getObject(1)));
+      _scorpions[0].index = 1;
       
       _upDistance = 0;
+      
+      
+      _krentile.addText(" TILE FONTS SUPPORT ", 32, 32, "alexkiddtest3.png", 2);
+      _krentile.addText(" ADDED TO KRENTILE! ", 32, 40, "alexkiddtest3.png", 2);
+      
+      _fpsTextObjectIndex = _krentile.addText("FPS: 0", 256, 8, "alexkiddtest3.png", 3);
       
       _krentile.draw();
       
@@ -434,26 +531,63 @@ class Game {
         _replaceCanvas = false;
       }
       
-      window.requestAnimationFrame(draw);
+      //window.requestAnimationFrame(draw);
+      window.animationFrame.then(draw);
+      /*new Future.delayed(const Duration(milliseconds:1), () {
+        double t = new DateTime.now().millisecondsSinceEpoch.toDouble();
+        draw(t);
+      });*/
     });
   }
   
+  int _second = -1;
+  int _frames = 0;
+  
   void draw(double time) {
     
-    // Scorpion
-    if (_scorpion.state == 0) {
-      bool scorpionCollision = (_krentile.event(_scorpion.x - 1, _scorpion.y) == 1);
-      if (_scorpion.x > 0 && !scorpionCollision) {
-        _scorpion.x--;
+    int currentSecond = (time / 1000.0).floor();
+    if (currentSecond != _second) {
+      _second = currentSecond;
+      print('second: $_second frames: $_frames');
+      _krentile.changeText(_fpsTextObjectIndex, 'FPS: $_frames');
+      _frames = 0;
+    }
+    _frames++;
+    
+    if (currentSecond % 5 == 0) {
+      // Add a new scorpion
+      Random rnd = new Random();
+      
+      if (rnd.nextBool()) {
+        SceneObject scorpionObject = new SceneObject.data(2, rnd.nextInt(512 - 17), rnd.nextInt(272), true, 0, 8);
+        int index = _krentile.addObject(scorpionObject, 2);
+        Scorpion scorpion = new Scorpion(scorpionObject);
+        scorpion.index = index;
+        _scorpions.add(scorpion);
       } else {
-        _scorpion.state = 1;
+        if (_scorpions.length > 2) {
+          _krentile.removeObject(_scorpions[0].index, 2);
+          _scorpions.removeAt(0);
+        }
       }
-    } else if (_scorpion.state == 1) {
-      bool scorpionCollision = (_krentile.event(_scorpion.x + 17, _scorpion.y) == 1);
-      if (_scorpion.x < (512 - 16) && !scorpionCollision) {
-        _scorpion.x++;
-      } else {
-        _scorpion.state = 0;
+    }
+    
+    // Scorpion
+    for (Scorpion scorpion in _scorpions) {
+      if (scorpion.state == 0) {
+        bool scorpionCollision = (_krentile.event(scorpion.x - 1, scorpion.y) == 1);
+        if (scorpion.x > 0 && !scorpionCollision) {
+          scorpion.x--;
+        } else {
+          scorpion.state = 1;
+        }
+      } else if (scorpion.state == 1) {
+        bool scorpionCollision = (_krentile.event(scorpion.x + 17, scorpion.y) == 1);
+        if (scorpion.x < (512 - 16) && !scorpionCollision) {
+          scorpion.x++;
+        } else {
+          scorpion.state = 0;
+        }
       }
     }
 
@@ -461,7 +595,7 @@ class Game {
     if (_alex.state == 6) {
       _alex.y = _alex.y - 2;
       if (_alex.bottom == 0) {
-        _krentile.disposeTextures();
+        _krentile.cleanUp();
         resetCanvas();
         initKrentile();
         return;
@@ -553,8 +687,11 @@ class Game {
         _alex.y = _alex.y + 2;
       }
       
-      if (isCollision(_alex, _scorpion)) {
-        _alex.state = 6;
+
+      for (Scorpion scorpion in _scorpions) {
+        if (isCollision(_alex, scorpion)) {
+          _alex.state = 6;
+        }
       }
     }
     
@@ -563,7 +700,12 @@ class Game {
     }*/
     
     _krentile.draw();
-    window.requestAnimationFrame(draw);
+    //window.requestAnimationFrame(draw);
+    window.animationFrame.then(draw);
+    /*new Future.delayed(const Duration(milliseconds:1), () {
+      double t = new DateTime.now().millisecondsSinceEpoch.toDouble();
+      draw(t);
+    });*/
   }
   
   bool isCollision(Alex object1, Scorpion object2) {
@@ -613,6 +755,7 @@ class Alex {
 class Scorpion {
   
   SceneObject _object;
+  int _index;
   
   Scorpion(this._object);
   
@@ -635,5 +778,12 @@ class Scorpion {
   int get top => _object.y;
   int get right => _object.x + 8 * 2;
   int get bottom => _object.y + 8 * 2;
+  
+  SceneObject get object => _object;
+  
+  int get index => _index;
+  void set index (int index) {
+    _index = index;
+  }
 }
 

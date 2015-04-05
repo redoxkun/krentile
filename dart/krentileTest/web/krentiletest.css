@@ -13,14 +13,14 @@ h1, p {
 }
 
 #sample_container_id {
-  width: 800px;
-  height: 600px;
+  width: 960px;
+  height: 720px;
   position: relative;
   border: 1px solid #ccc;
   background-color: #fff;
 }
 
 #webgl-canvas {
-  width: 800px;
-  height: 600px;
+  width: 960px;
+  height: 720px;
 }

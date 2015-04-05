@@ -87,7 +87,11 @@ class TextureManager {
     renderingContext.bindTexture(WebGL.RenderingContext.TEXTURE_2D, texture);
   }
   
-  void clearTextures() {
+  void clearTextures(WebGL.RenderingContext renderingContext) {
+    for (WebGL.Texture texture in _textures.values) {
+      renderingContext.deleteTexture(texture);
+    }
+    
     _textures = new Map<String, WebGL.Texture>();
   }
   

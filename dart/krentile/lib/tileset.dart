@@ -57,10 +57,16 @@ class TileSet {
     _tiles.clear();
     
     for (var jsonTile in tileSet['tiles']) {
+      int tileWidtdh = jsonTile['right'] - jsonTile['left'];
+      int tileHeight = jsonTile['bottom'] - jsonTile['top'];
+      
       Tile tile = new Tile(jsonTile['left'] / _width,
                            jsonTile['top'] / _height,
                            jsonTile['right'] / _width,
-                           jsonTile['bottom'] / _height);
+                           jsonTile['bottom'] / _height,
+                           tileWidtdh.toDouble().abs(),
+                           tileHeight.toDouble().abs());
+      
       _tiles.add(tile);
     }
     

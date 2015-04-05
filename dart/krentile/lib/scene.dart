@@ -24,14 +24,24 @@ class Scene {
   
   List<Layer> _layers;
   Map<String, TileSet> _tileSets;
-  List<SceneObject> _objects;
-  List<SceneObjectType> _objectTypes;
+  
+  List<SceneObject> _sceneObjects;
+  List<SceneObjectType> _sceneObjectTypes;
+  
+  List<int> _nullyfiedSceneObjects;
+  
+  List<TextObject> _textObjects;
+  
+  List<int> _nullyfiedTextObjects;
   
   int _tileSize;
   List<List<int>> _events;
   
   int _width;
   int _height;
+  
+  int _viewportWidth;
+  int _viewportHeight;
   
   List<double> _backgroundColor;
   
@@ -44,13 +54,23 @@ class Scene {
   void _init() {
     _layers = new List<Layer>();
     _tileSets = new Map<String, TileSet>();
-    _objects = new List<SceneObject>();
-    _objectTypes = new List<SceneObjectType>();
+    
+    _sceneObjects = new List<SceneObject>();
+    _sceneObjectTypes = new List<SceneObjectType>();
+    
+    _nullyfiedSceneObjects = new List<int>();
+    
+    _textObjects = new List<TextObject>();
+    
+    _nullyfiedTextObjects = new List<int>();
     
     _camera = new Camera();
     
     _width = 0;
     _height = 0;
+    
+    _viewportWidth = 0;
+    _viewportHeight = 0;
   }
   
   int get width => _width;
@@ -58,7 +78,21 @@ class Scene {
   
   Camera get camera => _camera;
   
-  List<SceneObject> get objects => _objects;
+  List<SceneObject> get sceneObjects => _sceneObjects;
+  
+  List<TextObject> get textObjects => _textObjects;
+  
+  int get viewportWidth => _viewportWidth;
+  
+  void set viewportWidth(int viewportWidth) {
+    _viewportWidth = viewportWidth;
+  }
+  
+  int get viewportHeight => _viewportHeight;
+  
+  void set viewportHeight(int viewportHeight) {
+    _viewportHeight = viewportHeight;
+  }
   
   /**
    * loadFromString
@@ -111,26 +145,37 @@ class Scene {
       _layers.add(layer);
     }
     
-    _objectTypes.clear();
+    _sceneObjectTypes.clear();
     
     for (var jsonObjectType in scene['objectTypes']) {
       SceneObjectType objectType = new SceneObjectType();
       objectType.loadFromJson(jsonObjectType, _tileSets, renderingContext);
-      _objectTypes.add(objectType);
+      _sceneObjectTypes.add(objectType);
     }
     
-    _objects.clear();
+    _sceneObjects.clear();
     
     for (var jsonObject in scene['objects']) {
       SceneObject object = new SceneObject.data(jsonObject['type'], jsonObject['x'], 
           jsonObject['y'], jsonObject['visible'], jsonObject['initialState'],
           jsonObject['drawsToAdvanceFrame']);
-      _objects.add(object);
+      _sceneObjects.add(object);
     }
 
     return Future.wait(futures);
   }
+
+  void cleanUp(WebGL.RenderingContext renderingContext) {
+    for (SceneObjectType sceneObjectType in _sceneObjectTypes) {
+      sceneObjectType.cleanUp(renderingContext);
+    }
+
+    TextureManager.instance.clearTextures(renderingContext);
+  }
   
+  /**
+   * Events management functions
+   */
   int event(int x, int y) {
     int indexX = x ~/ _tileSize;
     int indexY = y ~/ _tileSize;
@@ -150,6 +195,77 @@ class Scene {
   }
   
   /**
+   * Scene objects management functions
+   */
+  int addSceneObject(SceneObject object, int layer) {
+    int objectIndex;
+    if (_nullyfiedSceneObjects.length > 0) {
+      objectIndex = _nullyfiedSceneObjects[0];
+      _nullyfiedSceneObjects.removeAt(0);
+      _sceneObjects[objectIndex] = object;
+    } else {
+      _sceneObjects.add(object);
+      objectIndex = _sceneObjects.length - 1;
+    }
+    _layers[layer].addSceneObjectIndex(objectIndex);
+    return objectIndex;
+  }
+  
+  void removeSceneObject(int index, int layer) {
+    _sceneObjects[index] = null;
+    _nullyfiedSceneObjects.add(index);
+    _layers[layer].removeSceneObjectIndex(index);
+  }
+  
+  void changeSceneObject(int index, SceneObject newObject) {
+    _sceneObjects[index] = newObject;
+  }
+  
+  void changeSceneObjectBetweenLayers(int index, int fromLayer, int toLayer) {
+    _layers[fromLayer].removeSceneObjectIndex(index);
+    _layers[toLayer].addSceneObjectIndex(index);
+  }
+  
+  /**
+   * Text objects management functions
+   */
+  int addText(String text, int x, int y, String tileSet, int layer,
+                  WebGL.RenderingContext renderingContext) {
+    TileSet tileSetObject = _tileSets[tileSet];
+    
+    TextObject textObject = new TextObject.data(tileSetObject, x, y, true, text);
+    textObject.updateBuffers(renderingContext);
+    
+    return _addTextObject(textObject, layer);
+  }
+  
+  int _addTextObject(TextObject object, int layer) {
+    int objectIndex;
+    if (_nullyfiedTextObjects.length > 0) {
+      objectIndex = _nullyfiedTextObjects[0];
+      _nullyfiedTextObjects.removeAt(0);
+      _textObjects[objectIndex] = object;
+    } else {
+      _textObjects.add(object);
+      objectIndex = _textObjects.length - 1;
+    }
+    _layers[layer].addTextObjectIndex(objectIndex);
+    return objectIndex;
+  }
+  
+  void removeTextObject(int index, int layer, WebGL.RenderingContext renderingContext) {
+    _textObjects[index].cleanUp(renderingContext);
+    _textObjects[index] = null;
+    _nullyfiedTextObjects.add(index);
+    _layers[layer].removeTextObjectIndex(index);
+  }
+  
+  void changeTextObjectBetweenLayers(int index, int fromLayer, int toLayer) {
+    _layers[fromLayer].removeTextObjectIndex(index);
+    _layers[toLayer].addTextObjectIndex(index);
+  }
+  
+  /**
    * draw
    * TODO
    */
@@ -160,7 +276,7 @@ class Scene {
     }
     
     // Set viewport size
-    renderingContext.viewport(0, 0, _width, _height);
+    renderingContext.viewport(0, 0, _viewportWidth, _viewportHeight);
 
     // Clear color buffer
     renderingContext.clearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0);
@@ -170,7 +286,7 @@ class Scene {
     Float32List cameraTransform = _buildCameraMatrix();
     
     for (var layer in _layers) {
-      layer.draw(renderingContext, cameraTransform, _camera, _objectTypes, _objects);
+      layer.draw(renderingContext, cameraTransform, _camera, _sceneObjectTypes, _sceneObjects, _textObjects);
     }
   }
   

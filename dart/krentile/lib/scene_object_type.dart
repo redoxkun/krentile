@@ -67,11 +67,27 @@ class SceneObjectType {
     _buildBuffers(tilemaps, renderingContext);
   }
 
+  void cleanUp(WebGL.RenderingContext renderingContext) {
+    for (WebGL.Buffer vertexBuffer in _vertexBuffers) {
+      renderingContext.deleteBuffer(vertexBuffer);
+    }
+    _vertexBuffers.clear();
+
+    for (WebGL.Buffer indexBuffer in _indexBuffers) {
+      renderingContext.deleteBuffer(indexBuffer);
+    }
+    _indexBuffers.clear();
+  }
+
   /**
    * draw
    * TODO
    */
-  void draw(WebGL.RenderingContext renderingContext, Float32List cameraTransform, SceneObject object) {
+  void draw(WebGL.RenderingContext renderingContext, Float32List cameraTransform, SceneObject object,
+            double cameraOffsetX, double cameraOffsetY) {
+    
+    double offsetX = object.x + cameraOffsetX;
+    double offsetY = object.y + cameraOffsetY;
     
     int state = _states[object.state][object.frame];
     
@@ -96,7 +112,7 @@ class SceneObjectType {
 
     renderingContext.useProgram(ShaderManager.instance.program);
     renderingContext.uniformMatrix4fv(ShaderManager.instance.cameraTransform, false, cameraTransform);
-    renderingContext.uniform2f(ShaderManager.instance.positionOffset, object.x, object.y);
+    renderingContext.uniform2f(ShaderManager.instance.positionOffset, offsetX, offsetY);
     renderingContext.bindBuffer(WebGL.RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
     renderingContext.drawElements(WebGL.RenderingContext.TRIANGLES,
         vertexCount, WebGL.RenderingContext.UNSIGNED_SHORT, 0);

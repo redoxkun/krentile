@@ -33,7 +33,8 @@ class Layer {
 
   int _tileSize;
   
-  List<int> _objectIndices;
+  List<int> _sceneObjectIndices;
+  List<int> _textObjectIndices;
 
   int _chunkWidthTiles;
   int _chunkHeightTiles;
@@ -99,9 +100,27 @@ class Layer {
 
     _tileSet = tileSets[layer['tileSet']];
     
-    _objectIndices = layer['objects'];
+    _sceneObjectIndices = layer['objects'];
+    
+    _textObjectIndices = new List<int>();
 
     _buildBuffers(tilemap, renderingContext);
+  }
+  
+  void addSceneObjectIndex(int objectIndex) {
+    _sceneObjectIndices.add(objectIndex);
+  }
+  
+  void removeSceneObjectIndex(int objectIndex) {
+    _sceneObjectIndices.remove(objectIndex);
+  }
+  
+  void addTextObjectIndex(int objectIndex) {
+    _textObjectIndices.add(objectIndex);
+  }
+  
+  void removeTextObjectIndex(int objectIndex) {
+    _textObjectIndices.remove(objectIndex);
   }
 
   /**
@@ -109,7 +128,7 @@ class Layer {
    * TODO
    */
   void draw(WebGL.RenderingContext renderingContext, Float32List cameraTransform, Camera camera, 
-            List<SceneObjectType> objectTypes, List<SceneObject> objects) {
+            List<SceneObjectType> objectTypes, List<SceneObject> sceneObjects, List<TextObject> textObjects) {
     
     int xMin = camera.x - _halfWidth;
     int xMax = camera.x + _halfWidth;
@@ -161,15 +180,23 @@ class Layer {
       
     }
 
-    _objectIndices.sort((int a, int b) {
-      return objects[a].y - objects[b].y;
+    _sceneObjectIndices.sort((int a, int b) {
+      return sceneObjects[a].y - sceneObjects[b].y;
     });
     
-    for (int objectIndex in _objectIndices) {
-      SceneObject object = objects[objectIndex];
+    for (int objectIndex in _sceneObjectIndices) {
+      SceneObject object = sceneObjects[objectIndex];
       if (object.visible) {
         // TODO: Check if is in the viewport
-        objectTypes[object.type].draw(renderingContext, cameraTransform, object);
+        objectTypes[object.type].draw(renderingContext, cameraTransform, object, offsetX, offsetY);
+      }
+    }
+    
+    for (int objectIndex in _textObjectIndices) {
+      TextObject object = textObjects[objectIndex];
+      if (object.visible) {
+        // TODO: Check if is in the viewport
+        object.draw(renderingContext, cameraTransform, offsetX, offsetY);
       }
     }
 
